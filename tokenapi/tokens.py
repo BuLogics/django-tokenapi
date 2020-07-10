@@ -19,7 +19,7 @@ class PasswordResetTokenGenerator(object):
         """
         return self._make_token_with_timestamp(user, self._num_days(self._today()))
 
-    def check_token(self, user, token):
+    def check_token(self, user, token, timeout_days=None):
         """
         Check that a password reset token is correct for a given user.
         """
@@ -38,8 +38,14 @@ class PasswordResetTokenGenerator(object):
         if not constant_time_compare(self._make_token_with_timestamp(user, ts), token):
             return False
 
+        # Assign the token's limit to custom days, if supplied, otherwise to defaults.
+        try:
+            limit = int(timeout_days)
+        except TypeError:
+            limit = getattr(settings, 'TOKEN_TIMEOUT_DAYS', 30)
+
         # Check the timestamp is within limit
-        if (self._num_days(self._today()) - ts) > getattr(settings, 'TOKEN_TIMEOUT_DAYS', 7):
+        if (self._num_days(self._today()) - ts) > limit:
             return False
 
         return True

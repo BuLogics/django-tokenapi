@@ -91,3 +91,11 @@ class TokenManagementTestCase(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTrue(data['success'])
 
+    def test_check_token(self):
+        first_response = token_generator.check_token(self.user, self.token)
+        second_response = token_generator.check_token(self.user, self.token, 1)
+        third_response = token_generator.check_token(self.user, self.token, -1)
+
+        self.assertTrue(first_response)
+        self.assertTrue(second_response)
+        self.assertFalse(third_response)
